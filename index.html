@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>旅行工程表</title>
+  <title>突然关门的罪魁祸手处刑！</title>
   <style>
     * {
       box-sizing: border-box;
@@ -18,6 +18,19 @@
       max-width: 600px;
       margin: 0 auto;
     }
+    header {
+      text-align: center;
+      padding: 14px 0 10px;
+      background: #ffffff;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.15rem;
+      color: #2c3e50;
+      font-weight: bold;
+    }
 
     /* 工程表テーブル */
     .schedule-table {
@@ -27,7 +40,6 @@
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      margin-top: 8px;
     }
     .schedule-table th {
       background-color: #34495e;
@@ -116,6 +128,10 @@
 </head>
 <body>
 
+  <header>
+    <h1>【定期】突然閉店しやがった店が戦犯</h1>
+  </header>
+
   <table class="schedule-table">
     <thead>
       <tr>
@@ -124,6 +140,7 @@
       </tr>
     </thead>
     <tbody id="scheduleBody">
+      <!-- JavaScriptで動的描画 -->
     </tbody>
   </table>
 

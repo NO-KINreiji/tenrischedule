@@ -124,7 +124,6 @@
       </tr>
     </thead>
     <tbody id="scheduleBody">
-      <!-- JavaScriptで動的描画されます -->
     </tbody>
   </table>
 
@@ -154,21 +153,11 @@
       return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=walking`;
     }
 
-    // Yahoo!乗換案内URL作成（時刻指定対応）
-    function getYahooTransitUrl(from, to, timeStr) {
+    // Yahoo!乗換案内URL作成（現在時刻で検索）
+    function getYahooTransitUrl(from, to) {
       const cleanFrom = from.replace(/駅$/, "");
       const cleanTo = to.replace(/駅$/, "");
-      
-      let timeParams = "";
-      if (timeStr && timeStr.includes(":")) {
-        const [h, m] = timeStr.split(":");
-        const hh = h.padStart(2, "0");
-        const m1 = m[0]; // 分の10の位
-        const m2 = m[1]; // 分の1の位
-        timeParams = `&hh=${hh}&m1=${m1}&m2=${m2}&type=1`; // type=1 は出発時刻指定
-      }
-
-      return `https://transit.yahoo.co.jp/search/result?from=${encodeURIComponent(cleanFrom)}&to=${encodeURIComponent(cleanTo)}${timeParams}`;
+      return `https://transit.yahoo.co.jp/search/result?from=${encodeURIComponent(cleanFrom)}&to=${encodeURIComponent(cleanTo)}`;
     }
 
     // 工程表の描画
@@ -212,11 +201,10 @@
           let transitBtn = "";
           if (item.transitNext === "walk") {
             const url = getGoogleMapsUrl(item.place, nextItem.place);
-            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-walk">🚶 徒歩ルート</a>`;
+            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-walk">Googleマップで表示</a>`;
           } else if (item.transitNext === "train") {
-            // 出発時刻をセットして乗換検索URLを生成
-            const url = getYahooTransitUrl(item.place, nextItem.place, item.depTime);
-            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-train">🚃 電車乗換 (${item.depTime}発)</a>`;
+            const url = getYahooTransitUrl(item.place, nextItem.place);
+            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-train">Yahoo乗換で検索</a>`;
           }
 
           const lineText = item.lineNote ? `<span class="transit-line-info">（${item.lineNote}）</span>` : "";

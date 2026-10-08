@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>奈良・山の辺の道 旅行工程表</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 12px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 14px 0 10px;
+      background: #ffffff;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.15rem;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    .sub-title {
+      font-size: 0.75rem;
+      color: #7f8c8d;
+      margin-top: 4px;
+    }
+
+    /* 工程表テーブル */
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .schedule-table th {
+      background-color: #34495e;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 10px 4px;
+      text-align: center;
+    }
+    .schedule-table td {
+      border-bottom: 1px solid #edf2f7;
+      padding: 10px 6px;
+      vertical-align: middle;
+      font-size: 0.85rem;
+    }
+
+    /* 列幅指定 */
+    .col-time { width: 26%; text-align: center; }
+    .col-place { width: 46%; }
+    .col-cost { width: 28%; text-align: right; }
+
+    /* 時間スタイル */
+    .time-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.3;
+    }
+    .time-text {
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 0.85rem;
+    }
+    .time-arrow {
+      font-size: 0.7rem;
+      color: #95a5a6;
+      margin: 1px 0;
+    }
+
+    /* 場所・移動スタイル */
+    .place-title {
+      font-weight: bold;
+      font-size: 0.95rem;
+      color: #1a252f;
+      line-height: 1.3;
+    }
+    .place-controls {
+      display: flex;
+      gap: 4px;
+      margin-top: 5px;
+    }
+    .btn-sort {
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.68rem;
+      cursor: pointer;
+      color: #4a5568;
+    }
+
+    /* 移動区間行 */
+    .transit-row td {
+      background-color: #f8fafc;
+      padding: 8px 6px;
+      text-align: center;
+      border-bottom: 1px dashed #cbd5e0;
+    }
+    .transit-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #4a5568;
+    }
+    .transit-line-info {
+      font-size: 0.72rem;
+      color: #718096;
+      font-weight: 500;
+    }
+    .btn-map {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      transition: background-color 0.2s, opacity 0.2s;
+    }
+    .btn-map:active { opacity: 0.8; }
+    .btn-walk { background-color: #27ae60; } /* 徒歩：緑 */
+    .btn-train { background-color: #2980b9; } /* 電車：青 */
+
+    /* 金額・用途スタイル（編集可能） */
+    .cost-input {
+      width: 100%;
+      text-align: right;
+      border: 1px solid transparent;
+      background: transparent;
+      font-weight: bold;
+      color: #2980b9;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      padding: 2px 0;
+    }
+    .cost-input:hover, .cost-input:focus {
+      border-color: #cbd5e0;
+      background: #fff;
+      outline: none;
+    }
+    .usage-input {
+      width: 100%;
+      text-align: right;
+      border: 1px solid transparent;
+      background: transparent;
+      font-size: 0.72rem;
+      color: #718096;
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+    .usage-input:hover, .usage-input:focus {
+      border-color: #cbd5e0;
+      background: #fff;
+      outline: none;
+    }
+
+    /* 合計金額フッター */
+    .total-card {
+      margin-top: 14px;
+      background: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    .total-amount {
+      color: #f1c40f;
+      font-size: 1.25rem;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>奈良・山の辺の道 旅行工程表</h1>
+    <div class="sub-title">タップしてマップ・乗換案内を表示できます</div>
+  </header>
+
+  <table class="schedule-table">
+    <thead>
+      <tr>
+        <th class="col-time">時間</th>
+        <th class="col-place">場所・移動</th>
+        <th class="col-cost">金額・用途</th>
+      </tr>
+    </thead>
+    <tbody id="scheduleBody">
+      <!-- JavaScriptで動的描画されます -->
+    </tbody>
+  </table>
+
+  <div class="total-card">
+    予定総額：<span class="total-amount" id="totalAmount">0円</span>
+  </div>
+
+  <script>
+    // スケジュールデータ
+    let scheduleData = [
+      { arrTime: "", depTime: "08:30", place: "ホテル", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "移動のみ" },
+      { arrTime: "09:00", depTime: "09:08", place: "JR奈良駅", transitNext: "train", lineNote: "JR万葉まほろば線", cost: 0, usage: "移動のみ" },
+      { arrTime: "09:30", depTime: "09:35", place: "巻向駅", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "移動のみ" },
+      { arrTime: "10:00", depTime: "10:20", place: "檜原神社", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "参拝" },
+      { arrTime: "10:50", depTime: "11:30", place: "大神神社", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "参拝" },
+      { arrTime: "11:38", depTime: "11:40", place: "三輪駅", transitNext: "train", lineNote: "JR万葉まほろば線", cost: 0, usage: "移動のみ" },
+      { arrTime: "11:51", depTime: "11:53", place: "天理駅", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "移動のみ" },
+      { arrTime: "12:20", depTime: "13:00", place: "彩華ラーメン本店", transitNext: "walk", lineNote: "徒歩", cost: 1000, usage: "昼食" },
+      { arrTime: "13:30", depTime: "13:37", place: "天理駅", transitNext: "train", lineNote: "JR万葉まほろば線", cost: 0, usage: "移動のみ" },
+      { arrTime: "13:40", depTime: "13:42", place: "長柄駅", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "移動のみ" },
+      { arrTime: "13:50", depTime: "14:10", place: "大和神社", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "参拝" },
+      { arrTime: "14:30", depTime: "14:50", place: "長岳寺", transitNext: "walk", lineNote: "徒歩", cost: 400, usage: "拝観料" },
+      { arrTime: "15:05", depTime: "15:20", place: "伊射奈岐神社", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "参拝" },
+      { arrTime: "15:30", depTime: "15:48", place: "柳本駅", transitNext: "train", lineNote: "JR万葉まほろば線", cost: 0, usage: "移動のみ" },
+      { arrTime: "16:12", depTime: "16:14", place: "JR奈良駅", transitNext: "walk", lineNote: "徒歩", cost: 0, usage: "移動のみ" },
+      { arrTime: "16:44", depTime: "", place: "ホテル", transitNext: null, lineNote: "", cost: 0, usage: "帰着" }
+    ];
+
+    // Googleマップ徒歩ルートURL作成
+    function getGoogleMapsUrl(from, to) {
+      return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=walking`;
+    }
+
+    // Yahoo!乗換案内URL作成
+    function getYahooTransitUrl(from, to) {
+      const cleanFrom = from.replace(/駅$/, "");
+      const cleanTo = to.replace(/駅$/, "");
+      return `https://transit.yahoo.co.jp/search/result?from=${encodeURIComponent(cleanFrom)}&to=${encodeURIComponent(cleanTo)}`;
+    }
+
+    // 金額更新時に合計を計算
+    function updateCost(index, value) {
+      scheduleData[index].cost = Number(value) || 0;
+      calculateTotal();
+    }
+
+    // 用途更新
+    function updateUsage(index, value) {
+      scheduleData[index].usage = value;
+    }
+
+    // 総額計算
+    function calculateTotal() {
+      const total = scheduleData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
+      document.getElementById("totalAmount").innerText = total.toLocaleString() + "円";
+    }
+
+    // 順序変更（上下移動）
+    function moveItem(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= scheduleData.length) return;
+      
+      const temp = scheduleData[index];
+      scheduleData[index] = scheduleData[newIndex];
+      scheduleData[newIndex] = temp;
+      
+      renderSchedule();
+    }
+
+    // 工程表の描画
+    function renderSchedule() {
+      const tbody = document.getElementById("scheduleBody");
+      tbody.innerHTML = "";
+
+      scheduleData.forEach((item, index) => {
+        // 1. スポット行
+        const tr = document.createElement("tr");
+
+        // 時間列 (到着 → 出発)
+        const tdTime = document.createElement("td");
+        tdTime.className = "col-time";
+        
+        let timeHTML = "";
+        if (item.arrTime && item.depTime) {
+          timeHTML = `<div class="time-container"><span class="time-text">${item.arrTime}</span><span class="time-arrow">↓</span><span class="time-text">${item.depTime}</span></div>`;
+        } else if (item.depTime) {
+          timeHTML = `<div class="time-container"><span class="time-text">${item.depTime} 発</span></div>`;
+        } else if (item.arrTime) {
+          timeHTML = `<div class="time-container"><span class="time-text">${item.arrTime} 着</span></div>`;
+        }
+        tdTime.innerHTML = timeHTML;
+        tr.appendChild(tdTime);
+
+        // 場所列
+        const tdPlace = document.createElement("td");
+        tdPlace.className = "col-place";
+        
+        let sortBtns = `
+          <div class="place-controls">
+            ${index > 0 ? `<button class="btn-sort" onclick="moveItem(${index}, -1)">▲前へ</button>` : ''}
+            ${index < scheduleData.length - 1 ? `<button class="btn-sort" onclick="moveItem(${index}, 1)">▼次へ</button>` : ''}
+          </div>
+        `;
+        
+        tdPlace.innerHTML = `<div class="place-title">${item.place}</div>${sortBtns}`;
+        tr.appendChild(tdPlace);
+
+        // 金額・用途列（その場で入力・編集可能）
+        const tdCost = document.createElement("td");
+        tdCost.className = "col-cost";
+        tdCost.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: flex-end;">
+            <input type="number" class="cost-input" value="${item.cost}" onchange="updateCost(${index}, this.value)">円
+          </div>
+          <input type="text" class="usage-input" value="${item.usage}" placeholder="用途" onchange="updateUsage(${index}, this.value)">
+        `;
+        tr.appendChild(tdCost);
+
+        tbody.appendChild(tr);
+
+        // 2. 移動区間行（次の場所がある場合）
+        if (index < scheduleData.length - 1) {
+          const nextItem = scheduleData[index + 1];
+          const transitTr = document.createElement("tr");
+          transitTr.className = "transit-row";
+
+          let transitBtn = "";
+          if (item.transitNext === "walk") {
+            const url = getGoogleMapsUrl(item.place, nextItem.place);
+            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-walk">🚶 徒歩ルート</a>`;
+          } else if (item.transitNext === "train") {
+            const url = getYahooTransitUrl(item.place, nextItem.place);
+            transitBtn = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-map btn-train">🚃 電車乗換</a>`;
+          }
+
+          const lineText = item.lineNote ? `<span class="transit-line-info">（${item.lineNote}）</span>` : "";
+
+          transitTr.innerHTML = `
+            <td colspan="3">
+              <div class="transit-badge">
+                <div><strong>${item.place}</strong> → <strong>${nextItem.place}</strong> ${lineText}</div>
+                ${transitBtn}
+              </div>
+            </td>
+          `;
+          tbody.appendChild(transitTr);
+        }
+      });
+
+      calculateTotal();
+    }
+
+    // 初期描画
+    renderSchedule();
+  </script>
+</body>
+</html>
